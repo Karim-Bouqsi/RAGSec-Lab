@@ -1,0 +1,9 @@
+dockerfile_tp
+docs
+venv
+CLAUDE.md
+README.md
+.env
+src/rag_minimal
+README.md
+corpus
