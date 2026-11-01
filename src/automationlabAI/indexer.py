@@ -63,6 +63,6 @@ def indexer_documents(documents_path) :
 
 
 if __name__ == "__main__" : 
-  data = Path(__file__).parent.parent / "corpus" / "data"
+  data = Path(__file__).parent.parent.parent / "corpus" / "data"
 
   indexer_documents(data)
