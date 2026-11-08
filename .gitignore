@@ -7,3 +7,5 @@ README.md
 src/rag_minimal
 README.md
 corpus
+__pycache__
+src/automationlabAI/__pycache__
