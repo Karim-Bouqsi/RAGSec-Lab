@@ -9,3 +9,4 @@ README.md
 corpus
 __pycache__
 src/automationlabAI/__pycache__
+test_api.py

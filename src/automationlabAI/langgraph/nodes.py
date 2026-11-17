@@ -1,43 +1,24 @@
-from langchain_core.messages import AIMessage
-import ollama
+import os
 
+from langchain_core.messages import AIMessage
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
 from src.automationlabAI.langgraph.state import RAGState
 from src.automationlabAI.retriever import retrieve
+from dotenv import dotenv_values
 
 
+def get_llm() :
+  config = dotenv_values("/home/karim/Documents/RAGSec-Lab/.env")
+  return ChatOpenAI(
+      base_url="https://openrouter.ai/api/v1",
+      api_key=config.get("OPENROUTER_API_KEY"),
+      model="deepseek/deepseek-chat"
+  )
 
-def langgraph_retrieve(state : RAGState) :
-  question = state["rewritten_query"]
-  
-  role = state["role"]
-
-  docs = retrieve(question, role)
-
-  return {"context" : docs}
-
-
-def langgraph_generate(state : RAGState) : 
-  context = state["context"]
-  messages = state["messages"]
-
-  system_prompt = "Tu est un assistant qui répond uniquement sur les documents qui lui sont fournis"
-
-  response = ollama.chat(model="qwen2.5:3b", messages=[{"role" : "system", "content" : f"{system_prompt}\n\nDocuments :\n{context}"}] + [
-    {"role" : message.type, "content" : message.content} for message in messages
-  ])
-
-  return {"messages" : [AIMessage(content=response.message.content)]}
-
-def langgraph_no_context(state : RAGState) : 
-  return {"messages" : [AIMessage(content="Je n'ai pas l'information dans les documents disponibles")]}
-
-
-def langgraph_rewrite(state : RAGState) : 
-  messages = state["messages"]
-
-  system = f"""System: Tu reformules la dernière question de l'utilisateur en une question autonome complète, en tenant compte du contexte de la conversation. Réponds UNIQUEMENT avec la question reformulée. Historique : {messages}]"""
-  response = ollama.chat(model="qwen2.5:3b", messages=[{"role" : "system", "content" : f"{system}\n\nHistorique :\n"}] + [
-    {"role" : message.type, "content" : message.content} for message in messages
-  ])
-
-  return {"rewritten_query" : response.message.content}
+def make_retrieve_role(role : str) : 
+  @tool
+  def retrieve_docs(query : str) : 
+    """Recherche des documents pertinents dans la base de connaissance interne."""
+    return str(retrieve(query, role))
+  return retrieve_docs

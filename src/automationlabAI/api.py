@@ -1,6 +1,6 @@
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
-from src.automationlabAI.langgraph.graph import graph
+from src.automationlabAI.langgraph.graph import build_graph
 from src.automationlabAI.embed import encode
 from src.automationlabAI.indexer import insert_document
 
@@ -53,7 +53,9 @@ async def ask(request : QueryRequest, token : str=Depends(oauth2_scheme)) :
   thread_id = f"{username}-{request.conversation_id}"
   config = {"configurable" : {"thread_id" : thread_id}}
 
-  rag_response = graph.invoke({"messages" : [HumanMessage(request.question)], "role" : role, "context" : [], "rewritten_query" : None}, config)
+  graph = build_graph(role)
+  # a modif : 
+  rag_response = graph.invoke({"messages" : [HumanMessage(request.question)]}, config)
   return {"response" : rag_response["messages"][-1].content}
 
 # graph.invoke({"messages": [HumanMessage("Combien de congés ?")], "role": "rh", "context": []}, config)
