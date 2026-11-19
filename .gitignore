@@ -6,7 +6,7 @@ README.md
 .env
 src/rag_minimal
 README.md
-corpus
+corpus/generated/
 __pycache__
 src/automationlabAI/__pycache__
 test_api.py

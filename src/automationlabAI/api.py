@@ -1,14 +1,15 @@
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
 from src.automationlabAI.langgraph.graph import build_graph
+from src.automationlabAI.langgraph.memory import checkpointer
 from src.automationlabAI.embed import encode
 from src.automationlabAI.indexer import insert_document
-
+from fastapi.staticfiles import StaticFiles
 import uuid
 
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from src.automationlabAI.auth import create_access_token, get_user_from_db, verify_password, verify_token
+from src.automationlabAI.auth import create_access_token, get_user_from_db, get_all_users, verify_password, verify_token
 
 
 app = FastAPI(title="API AutomationLabAI", version="1.0.0")
@@ -24,10 +25,13 @@ class LoginRequest(BaseModel) :
   username : str
   password : str
 
-class IndexRequest(BaseModel) : 
+class IndexRequest(BaseModel) :
   content : str
   source : str
   acl_role : str
+
+class ProfileRequest(BaseModel) :
+  username : str
 
 
 @app.post("/conversation")
@@ -54,11 +58,8 @@ async def ask(request : QueryRequest, token : str=Depends(oauth2_scheme)) :
   config = {"configurable" : {"thread_id" : thread_id}}
 
   graph = build_graph(role)
-  # a modif : 
   rag_response = graph.invoke({"messages" : [HumanMessage(request.question)]}, config)
   return {"response" : rag_response["messages"][-1].content}
-
-# graph.invoke({"messages": [HumanMessage("Combien de congés ?")], "role": "rh", "context": []}, config)
 
 @app.post("/login")
 async def login(request : LoginRequest) : 
@@ -86,3 +87,63 @@ async def index(request : IndexRequest, token : str=Depends(oauth2_scheme)) :
   insert_document((request.content, embedding, request.source, request.acl_role))
 
   return {"message" : "Document indéxé avec succès"}
+
+@app.get("/history/{conversation_id}")
+async def get_history(conversation_id: str, token: str = Depends(oauth2_scheme)):
+    payload = verify_token(token)
+    username = payload.get("username")
+    if not username:
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+    thread_id = f"{username}-{conversation_id}"
+    config = {"configurable": {"thread_id": thread_id}}
+    checkpoint_tuple = checkpointer.get_tuple(config)
+
+    if not checkpoint_tuple:
+        return {"messages": []}
+
+    raw_messages = checkpoint_tuple.checkpoint.get("channel_values", {}).get("messages", [])
+
+    result = []
+    for msg in raw_messages:
+        if msg.type == "human":
+            result.append({"role": "user", "content": msg.content})
+        elif msg.type == "ai" and msg.content:
+            result.append({"role": "assistant", "content": msg.content})
+
+    return {"messages": result}
+
+
+@app.get("/profiles")
+async def get_profiles():
+    users = get_all_users()
+    return {"profiles": [{"username": u[0], "role": u[1]} for u in users]}
+
+
+@app.post("/select-profile")
+async def select_profile(request: ProfileRequest):
+    user = get_user_from_db(request.username)
+    if not user:
+        raise HTTPException(status_code=404, detail="Profil introuvable")
+    token = create_access_token({"username": user[0], "role": user[2]})
+    return {"access_token": token}
+
+
+@app.delete("/conversation/{conversation_id}")
+async def delete_conversation(conversation_id: str, token: str = Depends(oauth2_scheme)):
+    payload = verify_token(token)
+    username = payload.get("username")
+    if not username:
+        raise HTTPException(status_code=401, detail="Token invalide")
+
+    thread_id = f"{username}-{conversation_id}"
+    conn = checkpointer.conn
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM checkpoint_writes WHERE thread_id = %s", (thread_id,))
+        cur.execute("DELETE FROM checkpoint_blobs WHERE thread_id = %s", (thread_id,))
+        cur.execute("DELETE FROM checkpoints WHERE thread_id = %s", (thread_id,))
+
+    return {"message": "Conversation supprimée"}
+
+
+app.mount("/", StaticFiles(directory="src/automationlabAI/static", html=True), name="static")

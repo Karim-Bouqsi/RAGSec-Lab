@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+  <div id="app" class="chat-layout">
+
+    <aside id="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-brand">
+          <div class="brand-icon sm">N</div>
+          <span class="brand-name">Scout</span>
+        </div>
+        <button id="new-conv" class="new-chat-btn" title="Nouvelle conversation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <span class="section-label">Conversations</span>
+        <div id="conv-list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div id="current-profile" class="current-profile"></div>
+        <a href="index.html" class="switch-profile-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Changer de profil
+        </a>
+      </div>
+    </aside>
+
+    <div id="main">
+
+      <div id="welcome">
+        <div class="welcome-icon">
+          <div class="brand-icon lg">S</div>
+        </div>
+        <h1 class="welcome-title">Hey, je suis <span class="accent-text">Scout</span>.</h1>
+        <p class="welcome-sub">Comment puis-je vous aider aujourd'hui ?</p>
+        <div class="quick-chips">
+          <button class="chip" data-q="Quels sont les documents disponibles ?">Documents disponibles</button>
+          <button class="chip" data-q="Quelle est la politique de congés ?">Politique RH</button>
+          <button class="chip" data-q="Donne-moi la documentation technique.">Documentation technique</button>
+        </div>
+      </div>
+
+      <div id="messages"></div>
+
+      <div id="input-area">
+        <div class="input-box">
+          <input type="text" id="question" placeholder="Posez votre question à Scout…" autocomplete="off">
+          <button id="send">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

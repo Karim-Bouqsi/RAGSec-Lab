@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scout — Administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+  <div id="app">
+    <header class="admin-header">
+      <div class="admin-brand">
+        <div class="sidebar-logo small">N</div>
+        <span>Scout — Administration</span>
+      </div>
+      <div class="admin-nav">
+        <a href="chat.html" class="nav-link">Chatbot</a>
+        <button id="logout" class="btn-logout-admin">Changer de profil</button>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <div id="admin-form">
+        <h2>Indexer un document</h2>
+        <p class="form-hint">Les documents indexés seront accessibles aux utilisateurs selon leur rôle ACL.</p>
+
+        <div class="field-group">
+          <label for="content">Contenu du document</label>
+          <textarea id="content" rows="6" placeholder="Collez ici le contenu du document…"></textarea>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="source">Source</label>
+            <input type="text" id="source" placeholder="ex: rh/conges.txt">
+          </div>
+          <div class="field-group">
+            <label for="acl_role">Rôle ACL</label>
+            <select id="acl_role">
+              <option value="rh">rh</option>
+              <option value="technique">technique</option>
+              <option value="support">support</option>
+              <option value="wiki">wiki</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="index-btn" class="btn-primary">Indexer le document</button>
+        <div id="status"></div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
